@@ -1,0 +1,7 @@
+pandas
+streamlit
+pathlib
+langchain
+sqlalchemy
+langchain_groq
+SQLAlchemy
