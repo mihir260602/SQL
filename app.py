@@ -11,6 +11,7 @@ from langchain_groq import ChatGroq
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import time  # Import for loading indicator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -27,11 +28,18 @@ st.markdown(
     <style>
     /* Background image for the entire app */
     .stApp {
-        background-image: url('https://www.icegif.com/space-46/');
-        background-size: contain;
-        background-position: center;
-        background-repeat:no-repeat ;
+        background-color: #1e1e1e; /* Fallback color if image fails to load */
         color: white;
+    }
+
+    /* Custom background for the heading */
+    .header-container {
+        background-image: url('https://www.icegif.com/space-46/');
+        background-size: cover;
+        background-position: center;
+        padding: 50px;
+        border-radius: 15px;
+        transition: background 0.5s ease;
     }
 
     /* Custom font for the title */
@@ -41,6 +49,7 @@ st.markdown(
         font-size: 3em;
         color: white;
         margin-top: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     /* Custom font for the tagline */
@@ -84,15 +93,31 @@ st.markdown(
         color: white;
     }
 
+    /* Loading spinner */
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-left-color: #F0E68C;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
     </style>
     """, 
     unsafe_allow_html=True
 )
 
-# Add HTML for the heading, tagline, and logo
+# Add HTML for the heading, tagline, and logo with background image
 st.markdown(
     """
-    <div class="container">
+    <div class="container header-container">
         <img src="https://th.bing.com/th/id/OIP.Q6FO3FA_rXGiJkF6k6615wAAAA?rs=1&pid=ImgDetMain" alt="Logo" class="logo">
         <h1 class="main-title">LangChain SQL Chatbot</h1>
         <p class="tagline">Empowering your data with AI-driven conversations</p>
@@ -145,28 +170,30 @@ if user_query:
     st.session_state.messages.append({"role": "user", "content": user_query})
     st.chat_message("user").write(user_query)
 
-    # Generate response from agent
-    with st.chat_message("assistant"):
-        streamlit_callback = StreamlitCallbackHandler(st.container())
-        try:
-            response = agent.run(user_query, callbacks=[streamlit_callback])
-            st.session_state.messages.append({"role": "assistant", "content": response})
+    # Display loading spinner while processing
+    with st.spinner("Processing your query..."):
+        time.sleep(1)  # Optional: Add a small delay for UX
+        with st.chat_message("assistant"):
+            streamlit_callback = StreamlitCallbackHandler(st.container())
+            try:
+                response = agent.run(user_query, callbacks=[streamlit_callback])
+                st.session_state.messages.append({"role": "assistant", "content": response})
 
-            # Handle both final answers and actions
-            if isinstance(response, str):
-                # Directly handle string responses
-                st.write(response)
-            elif isinstance(response, list):
-                # Handle list responses, assuming they might be in tabular format
-                if all(isinstance(i, tuple) for i in response) and len(response) > 0:
-                    # Assuming the first tuple contains the headers
-                    headers = [f"Column {i+1}" for i in range(len(response[0]))]
-                    df = pd.DataFrame(response, columns=headers)
-                    st.dataframe(df.style.set_properties(**{'color': 'white', 'background-color': 'black'}))
+                # Handle both final answers and actions
+                if isinstance(response, str):
+                    # Directly handle string responses
+                    st.write(response)
+                elif isinstance(response, list):
+                    # Handle list responses, assuming they might be in tabular format
+                    if all(isinstance(i, tuple) for i in response) and len(response) > 0:
+                        # Assuming the first tuple contains the headers
+                        headers = [f"Column {i+1}" for i in range(len(response[0]))]
+                        df = pd.DataFrame(response, columns=headers)
+                        st.dataframe(df.style.set_properties(**{'color': 'white', 'background-color': 'black'}))
+                    else:
+                        st.write("The response is not in tabular format.")
                 else:
-                    st.write("The response is not in tabular format.")
-            else:
-                st.write("Unexpected response format.")
+                    st.write("Unexpected response format.")
                 
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
