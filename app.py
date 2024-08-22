@@ -19,13 +19,87 @@ load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
 
 # Setting up the page configuration with title and icon
-st.set_page_config(page_title="LangChain: Chat with SQL DB", page_icon="🦜")
+st.set_page_config(page_title="LangChain: Chat with SQL DB", page_icon="🦜",layout="centered")
 
-# Setting up the title of the app
-st.title("🦜 LangChain: Chat with SQL DB")
+# Adding custom CSS and HTML for UI enhancement
+st.markdown(
+    """
+    <style>
+    /* Background image for the entire app */
+    .stApp {
+        background-image: url('https://www.icegif.com/space-46/');
+        background-size: contain;
+        background-position: center;
+        background-repeat:no-repeat ;
+        color: white;
+    }
 
-# Database connection options (no sidebar now)
-radio_opt = ["Use SQLite 3 Database - analytics_db"]
+    /* Custom font for the title */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+    .main-title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 3em;
+        color: white;
+        margin-top: 0;
+    }
+
+    /* Custom font for the tagline */
+    .tagline {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.5em;
+        color: #F0E68C;
+        margin-bottom: 30px;
+    }
+
+    /* Logo styling */
+    .logo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 150px;
+        height: 150px;
+    }
+
+    /* Hover effect on the entire container */
+    .container:hover {
+        transform: scale(1.05);
+        transition: transform 0.5s ease;
+    }
+
+    /* Make the input box have a transparent background */
+    .stTextInput input {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid #F0E68C;
+    }
+
+    /* Modify chat input placeholder */
+    .stTextInput input::placeholder {
+        color: #F0E68C;
+    }
+
+    /* Adjust chat message bubbles */
+    .stMessage .stMessageContent {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    </style>
+    """, 
+    unsafe_allow_html=True
+)
+
+# Add HTML for the heading, tagline, and logo
+st.markdown(
+    """
+    <div class="container">
+        <img src="https://th.bing.com/th/id/OIP.Q6FO3FA_rXGiJkF6k6615wAAAA?rs=1&pid=ImgDetMain" alt="Logo" class="logo">
+        <h1 class="main-title">LangChain SQL Chatbot</h1>
+        <p class="tagline">Empowering your data with AI-driven conversations</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Info messages if API key is not provided
 if not api_key:
@@ -45,11 +119,11 @@ def configure_db():
 db = configure_db()
 
 # SQL toolkit
-toolkit = SQLDatabaseToolkit(db=db, llm=llm)  # Directly pass llm object
+toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
 # Creating an agent with SQL DB and Groq LLM
 agent = create_sql_agent(
-    llm=llm,  # Pass llm directly
+    llm=llm,
     toolkit=toolkit,
     verbose=True,
     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION
