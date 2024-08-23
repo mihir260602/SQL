@@ -183,7 +183,7 @@ if user_query:
                 if isinstance(response, str):
                     # Directly handle string responses
                     st.write(response)
-                    st.balloons()
+                    st.snow()
                 elif isinstance(response, list):
                     # Handle list responses, assuming they might be in tabular format
                     if all(isinstance(i, tuple) for i in response) and len(response) > 0:
@@ -191,7 +191,7 @@ if user_query:
                         headers = [f"Column {i+1}" for i in range(len(response[0]))]
                         df = pd.DataFrame(response, columns=headers)
                         st.dataframe(df.style.set_properties(**{'color': 'white', 'background-color': 'black'}))
-                        st.balloons()
+                        st.snow()
                     else:
                         st.write("The response is not in tabular format.")
                 else:
