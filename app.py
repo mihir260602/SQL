@@ -189,8 +189,8 @@ if user_query:
                         # Assuming the first tuple contains the headers
                         headers = [f"Column {i+1}" for i in range(len(response[0]))]
                         df = pd.DataFrame(response, columns=headers)
-                        st.dataframe(df.style.set_properties(**{'color': 'white', 'background-color': 'black'}))
                         st.balloons()
+                        st.dataframe(df.style.set_properties(**{'color': 'white', 'background-color': 'black'}))
                     else:
                         st.write("The response is not in tabular format.")
                 else:
